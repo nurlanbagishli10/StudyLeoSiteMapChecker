@@ -19,7 +19,8 @@ Bu alət, veb saytların sitemap.xml fayllarındakı bütün linkləri avtomatik
 - [Konfiqurasiya | Configuration](#-konfiqurasiya--configuration)
 - [Çıxış Formatları | Output Formats](#-çıxış-formatları--output-formats)
 - [Nümunələr | Examples](#-nümunələr--examples)
-- [Alətlər | Tools](#-alətlər--tools)
+- [Layihə Strukturu | Project Structure](#️-layihə-strukturu--project-structure)
+- [Töhfə Vermək | Contributing](#-töhfə-vermək--contributing)
 
 ---
 
