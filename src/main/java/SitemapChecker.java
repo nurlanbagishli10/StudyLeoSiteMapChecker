@@ -25,7 +25,7 @@ public class SitemapChecker {
     // ⚙️ DİL FİLTRLƏRİ (Əgər list boşdursa, bütün dillər yoxlanacaq. əgər müəyyən dillər göstərilərsə, yalnız onlar yoxlanacaq)
     // Məsələn: yalnız EN və RU yoxlamaq üçün:  {"en", "ru"}. Bütün dillərin id-ləri { "en","ar","ru", "fa", "ku", "az", "kk", "tr", "bg", "id", "de", "zh", "fr", "ky", "ur", "so", "tk", "uz", "sw"}
     private static final Set<String> LANGUAGE_FILTER = new HashSet<>(Arrays.asList(
-            "en","ar","ru", "fa", "ku", "az", "kk", "tr", "bg", "id", "de", "zh", "fr", "ky", "ur", "so", "tk", "uz", "sw"
+            "ku","ur"
     ));
 
     private int totalChecked = 0;

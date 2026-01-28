@@ -1,0 +1,33 @@
+SITEMAP RE-CHECK REPORT
+Generated: Wed Jan 28 15:05:33 AZT 2026
+================================================================================
+
+SUMMARY:
+Total Rechecked: 25
+Fixed/Working: 22
+Still Broken: 3
+
+DETAILED RESULTS:
+================================================================================
+
+
+URL:  https://studyleo.com/ku/زانکۆکان/كۆلەجە-تایبەتی-پزیشکی
+  Attempt 1 (HEAD): [404] - 334ms
+  Attempt 2 (GET):  [404] - 224ms
+  Attempt 3 (GET):  [404] - 421ms
+  Status:  BROKEN
+
+
+URL:  https://studyleo.com/kk/университеттер/стамбул-денсаулық-және
+  Attempt 1 (HEAD): [404] - 325ms
+  Attempt 2 (GET):  [404] - 262ms
+  Attempt 3 (GET):  [404] - 468ms
+  Status:  BROKEN
+
+
+URL:  https://studyleo.com/ur/یونیورسٹیاں/استنبول
+  Attempt 1 (HEAD): [404] - 316ms
+  Attempt 2 (GET):  [404] - 258ms
+  Attempt 3 (GET):  [404] - 424ms
+  Status:  BROKEN
+
