@@ -56,7 +56,7 @@ public class SitemapReChecker {
 
     /**
      * ⭐ ƏSAS FUNKSIYA:  Avtomatik olaraq xətalı linkləri tap
-     * Axtarış sırası: 
+     * Axtarış sırası:
      * 1. Clipboard (əgər copy etmisənsə)
      * 2. sitemap_errors.txt
      * 3. sitemap_report.txt
@@ -230,7 +230,7 @@ public class SitemapReChecker {
             if (clipboard.isDataFlavorAvailable(java.awt.datatransfer.DataFlavor.stringFlavor)) {
                 String clipboardText = (String) clipboard.getData(java.awt.datatransfer.DataFlavor.stringFlavor);
 
-                // Clipboard-da xətalı linklər varmı? 
+                // Clipboard-da xətalı linklər varmı?
                 String[] lines = clipboardText.split("\n");
                 for (String line : lines) {
                     String url = extractErrorUrl(line);
