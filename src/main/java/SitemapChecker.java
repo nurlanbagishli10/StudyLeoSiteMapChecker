@@ -140,6 +140,7 @@ public class SitemapChecker {
                     System.out.println("📁 Log qovluğu yaradıldı: " + logDirectory.getAbsolutePath());
                 } else {
                     System.err.println("⚠️ Log qovluğu yaradıla bilmədi, cari qovluqda saxlanacaq");
+                    logDirectory = new File(".");  // Fallback to current directory
                 }
             }
 
