@@ -5,8 +5,7 @@ target/
 .kotlin
 
 ### Generated log files ###
-sitemap_check_*.txt
-sitemap_check_*.csv
+logs/
 recheck_report_*.txt
 
 ### IntelliJ IDEA ###

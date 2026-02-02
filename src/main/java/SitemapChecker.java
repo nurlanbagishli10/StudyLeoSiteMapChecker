@@ -34,6 +34,9 @@ public class SitemapChecker {
     private static final int THREAD_COUNT = 10;           // Paralel thread sayı
     private static final int MAX_CONCURRENT_REQUESTS = 10; // Eyni anda maksimum sorğu sayı
 
+    // ⚙️ LOG QOVLUQ KONFİQURASİYASI
+    private static final String LOG_DIRECTORY = "logs";  // Logların saxlanacağı qovluq
+
     private AtomicInteger totalChecked = new AtomicInteger(0);
     private AtomicInteger totalOK = new AtomicInteger(0);
     private AtomicInteger totalErrors = new AtomicInteger(0);
@@ -129,10 +132,22 @@ public class SitemapChecker {
         try {
             timestamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 
-            File logFile = new File("sitemap_check_" + timestamp + ".txt");
+            // Log qovluğunu yarat (əgər yoxdursa)
+            File logDirectory = new File(LOG_DIRECTORY);
+            if (!logDirectory.exists()) {
+                boolean created = logDirectory.mkdirs();
+                if (created) {
+                    System.out.println("📁 Log qovluğu yaradıldı: " + logDirectory.getAbsolutePath());
+                } else {
+                    System.err.println("⚠️ Log qovluğu yaradıla bilmədi, cari qovluqda saxlanacaq");
+                }
+            }
+
+            // Log faylının yolunu qovluq daxilində müəyyən et
+            File logFile = new File(logDirectory, "sitemap_check_" + timestamp + ".txt");
             logWriter = new PrintWriter(new FileWriter(logFile), true);
 
-            File csvFile = new File("sitemap_check_" + timestamp + ".csv");
+            File csvFile = new File(logDirectory, "sitemap_check_" + timestamp + ".csv");
             csvWriter = new PrintWriter(new FileWriter(csvFile), true);
             csvWriter.println("Status,URL,Encoded URL,Error Message");
 
