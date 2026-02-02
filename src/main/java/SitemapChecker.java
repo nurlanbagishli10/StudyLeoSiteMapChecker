@@ -4,6 +4,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -28,13 +30,20 @@ public class SitemapChecker {
             "ku","ur"
     ));
 
-    private int totalChecked = 0;
-    private int totalOK = 0;
-    private int totalErrors = 0;
-    private int totalSkipped = 0;
+    // ⚙️ MULTI-THREADING KONFİQURASİYASI
+    private static final int THREAD_COUNT = 10;           // Paralel thread sayı
+    private static final int MAX_CONCURRENT_REQUESTS = 10; // Eyni anda maksimum sorğu sayı
+
+    private AtomicInteger totalChecked = new AtomicInteger(0);
+    private AtomicInteger totalOK = new AtomicInteger(0);
+    private AtomicInteger totalErrors = new AtomicInteger(0);
+    private AtomicInteger totalSkipped = new AtomicInteger(0);
     private Set<String> processedSitemaps = new HashSet<>();
-    private List<String> allResults = new ArrayList<>();
-    private List<String> errorDetails = new ArrayList<>();
+    private ConcurrentLinkedQueue<String> allResults = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<String> errorDetails = new ConcurrentLinkedQueue<>();
+
+    private ExecutorService executor;
+    private Semaphore rateLimiter;
 
     private PrintWriter logWriter;
     private PrintWriter csvWriter;
@@ -47,6 +56,10 @@ public class SitemapChecker {
 
     public void run() {
         try {
+            // İnisializasiya threading komponentləri
+            executor = Executors.newFixedThreadPool(THREAD_COUNT);
+            rateLimiter = new Semaphore(MAX_CONCURRENT_REQUESTS);
+
             initializeLogFiles();
 
             printHeader();
@@ -60,41 +73,56 @@ public class SitemapChecker {
 
             checkSitemap(SITEMAP_URL, 0);
 
+            // Bütün task-ların bitməsini gözlə
+            executor.shutdown();
+            if (!executor.awaitTermination(1, TimeUnit.HOURS)) {
+                System.err.println("⚠️ Bəzi task-lar vaxtında bitmədi, zorla bağlanır...");
+                executor.shutdownNow();
+            }
+
             printSummary();
 
+        } catch (InterruptedException e) {
+            System.err.println("❌ İcra kəsildi: " + e.getMessage());
+            executor.shutdownNow();
         } finally {
             closeLogFiles();
         }
     }
 
     private void printTestConfig() {
-        System.out.println("⚙️  TEST KONFİQURASİYASI:");
-        System.out. println("   📂 Yoxlanacaq kateqoriyalar:");
-        if (CHECK_STATIC) System.out.println("      ✅ Static pages");
-        if (CHECK_UNIVERSITIES) System.out.println("      ✅ Universities");
-        if (CHECK_BLOGS) System.out.println("      ✅ Blogs");
-        if (CHECK_BLOG_TAGS) System.out.println("      ✅ Blog Tags");
-        if (CHECK_BLOG_CATEGORIES) System.out.println("      ✅ Blog Categories");
-        if (CHECK_SEO_PAGES) System.out.println("      ✅ SEO Pages");
+        synchronized (System.out) {
+            System.out.println("⚙️  TEST KONFİQURASİYASI:");
+            System.out. println("   📂 Yoxlanacaq kateqoriyalar:");
+            if (CHECK_STATIC) System.out.println("      ✅ Static pages");
+            if (CHECK_UNIVERSITIES) System.out.println("      ✅ Universities");
+            if (CHECK_BLOGS) System.out.println("      ✅ Blogs");
+            if (CHECK_BLOG_TAGS) System.out.println("      ✅ Blog Tags");
+            if (CHECK_BLOG_CATEGORIES) System.out.println("      ✅ Blog Categories");
+            if (CHECK_SEO_PAGES) System.out.println("      ✅ SEO Pages");
 
-        if (! CHECK_STATIC || !CHECK_UNIVERSITIES || !CHECK_BLOGS ||
-                !CHECK_BLOG_TAGS || !CHECK_BLOG_CATEGORIES || !CHECK_SEO_PAGES) {
-            System.out.println("   ⏭️  Skip ediləcək:");
-            if (! CHECK_STATIC) System.out.println("      ❌ Static pages");
-            if (!CHECK_UNIVERSITIES) System.out.println("      ❌ Universities");
-            if (!CHECK_BLOGS) System.out.println("      ❌ Blogs");
-            if (!CHECK_BLOG_TAGS) System.out.println("      ❌ Blog Tags");
-            if (!CHECK_BLOG_CATEGORIES) System.out.println("      ❌ Blog Categories");
-            if (!CHECK_SEO_PAGES) System.out.println("      ❌ SEO Pages");
+            if (! CHECK_STATIC || !CHECK_UNIVERSITIES || !CHECK_BLOGS ||
+                    !CHECK_BLOG_TAGS || !CHECK_BLOG_CATEGORIES || !CHECK_SEO_PAGES) {
+                System.out.println("   ⏭️  Skip ediləcək:");
+                if (! CHECK_STATIC) System.out.println("      ❌ Static pages");
+                if (!CHECK_UNIVERSITIES) System.out.println("      ❌ Universities");
+                if (!CHECK_BLOGS) System.out.println("      ❌ Blogs");
+                if (!CHECK_BLOG_TAGS) System.out.println("      ❌ Blog Tags");
+                if (!CHECK_BLOG_CATEGORIES) System.out.println("      ❌ Blog Categories");
+                if (!CHECK_SEO_PAGES) System.out.println("      ❌ SEO Pages");
+            }
+
+            if (! LANGUAGE_FILTER.isEmpty()) {
+                System.out.println("   🌐 Yoxlanacaq dillər:  " + String.join(", ", LANGUAGE_FILTER));
+            } else {
+                System.out. println("   🌐 Dil filtri:  Hamısı");
+            }
+
+            System.out.println("   🧵 Thread sayı: " + THREAD_COUNT);
+            System.out.println("   🔒 Maksimum eyni anda sorğu: " + MAX_CONCURRENT_REQUESTS);
+
+            System.out.println();
         }
-
-        if (! LANGUAGE_FILTER.isEmpty()) {
-            System.out.println("   🌐 Yoxlanacaq dillər:  " + String.join(", ", LANGUAGE_FILTER));
-        } else {
-            System.out. println("   🌐 Dil filtri:  Hamısı");
-        }
-
-        System.out.println();
     }
 
     private void initializeLogFiles() {
@@ -108,23 +136,25 @@ public class SitemapChecker {
             csvWriter = new PrintWriter(new FileWriter(csvFile), true);
             csvWriter.println("Status,URL,Encoded URL,Error Message");
 
-            System.out.println("📁 Log faylları yaradıldı:");
-            System.out.println("   📄 " + logFile.getAbsolutePath());
-            System.out.println("   📊 " + csvFile.getAbsolutePath());
-            System.out.println();
+            synchronized (System.out) {
+                System.out.println("📁 Log faylları yaradıldı:");
+                System.out.println("   📄 " + logFile.getAbsolutePath());
+                System.out.println("   📊 " + csvFile.getAbsolutePath());
+                System.out.println();
+            }
 
         } catch (IOException e) {
             System.err.println("❌ Log faylları yaradıla bilmədi: " + e.getMessage());
         }
     }
 
-    private void logToFile(String message) {
+    private synchronized void logToFile(String message) {
         if (logWriter != null) {
             logWriter.println(message);
         }
     }
 
-    private void logToCsv(int statusCode, String url, String encodedUrl, String errorMsg) {
+    private synchronized void logToCsv(int statusCode, String url, String encodedUrl, String errorMsg) {
         if (csvWriter != null) {
             String escapedUrl = "\"" + url.replace("\"", "\"\"") + "\"";
             String escapedEncoded = "\"" + (encodedUrl != null ? encodedUrl.replace("\"", "\"\"") : "") + "\"";
@@ -137,7 +167,9 @@ public class SitemapChecker {
     private void closeLogFiles() {
         if (logWriter != null) {
             logWriter.close();
-            System.out.println("\n✅ Log faylları saxlanıldı.");
+            synchronized (System.out) {
+                System.out.println("\n✅ Log faylları saxlanıldı.");
+            }
         }
         if (csvWriter != null) {
             csvWriter.close();
@@ -153,16 +185,20 @@ public class SitemapChecker {
         // Sitemap-i yoxla və skip edilməlidirsə, skip et
         if (! sitemapUrl.equals(SITEMAP_URL) && shouldSkipSitemap(sitemapUrl)) {
             String msg = "⏭️  Skip edildi: " + sitemapUrl + " " + getSkipReason(sitemapUrl);
-            System.out.println(msg);
+            synchronized (System.out) {
+                System.out.println(msg);
+            }
             logToFile(msg);
-            totalSkipped++;
+            totalSkipped.incrementAndGet();
             return;
         }
 
         try {
             String indent = "  ".repeat(depth);
             String message = indent + "📄 Sitemap açılır: " + sitemapUrl;
-            System.out.println(message);
+            synchronized (System.out) {
+                System.out.println(message);
+            }
             logToFile(message);
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -192,7 +228,9 @@ public class SitemapChecker {
 
                 message = indent + "   ✓ Alt-sitemap sayı: " + sitemapNodes.getLength() +
                         " (yoxlanacaq: " + willCheck + ", skip: " + willSkip + ")";
-                System.out. println(message);
+                synchronized (System.out) {
+                    System.out. println(message);
+                }
                 logToFile(message);
 
                 for (int i = 0; i < sitemapNodes.getLength(); i++) {
@@ -204,7 +242,9 @@ public class SitemapChecker {
 
                         if (! shouldSkipSitemap(subSitemapUrl)) {
                             message = indent + "   ↳ Alt-sitemap: " + subSitemapUrl;
-                            System.out.println(message);
+                            synchronized (System.out) {
+                                System.out.println(message);
+                            }
                             logToFile(message);
                         }
 
@@ -213,20 +253,40 @@ public class SitemapChecker {
                 }
             }
 
-            // Səhifə linkləri
+            // Səhifə linkləri - paralel yoxlama
             NodeList urlNodes = doc.getElementsByTagName("url");
             if (urlNodes.getLength() > 0) {
                 message = indent + "   ✓ Tapılan səhifə sayı: " + urlNodes.getLength();
-                System.out. println(message);
+                synchronized (System.out) {
+                    System.out. println(message);
+                }
                 logToFile(message);
 
+                // Bütün URL-ləri paralel yoxla
+                List<Future<?>> futures = new ArrayList<>();
                 for (int i = 0; i < urlNodes.getLength(); i++) {
                     Element urlElement = (Element) urlNodes.item(i);
                     NodeList locNodes = urlElement.getElementsByTagName("loc");
 
                     if (locNodes.getLength() > 0) {
                         String url = locNodes.item(0).getTextContent().trim();
-                        checkUrl(url, depth);
+                        final int urlDepth = depth;
+                        
+                        // Submit task-ı executor-a
+                        Future<?> future = executor.submit(() -> checkUrl(url, urlDepth));
+                        futures.add(future);
+                    }
+                }
+
+                // Bu sitemap üçün bütün task-ların bitməsini gözlə
+                for (Future<?> future : futures) {
+                    try {
+                        future.get();
+                    } catch (ExecutionException e) {
+                        System.err.println("❌ URL yoxlama xətası: " + e.getMessage());
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -294,7 +354,7 @@ public class SitemapChecker {
     }
 
     private void checkUrl(String url, int depth) {
-        totalChecked++;
+        totalChecked.incrementAndGet();
         String indent = "  ".repeat(depth + 1);
 
         int maxRetries = 2;
@@ -302,66 +362,85 @@ public class SitemapChecker {
 
         while (retryCount <= maxRetries) {
             try {
-                String encodedUrl = encodeUrl(url);
+                // Rate limiting
+                rateLimiter.acquire();
+                
+                try {
+                    String encodedUrl = encodeUrl(url);
 
-                HttpURLConnection connection = (HttpURLConnection) new URL(encodedUrl).openConnection();
-                connection.setRequestMethod("HEAD");
-                connection.setConnectTimeout(10000);
-                connection.setReadTimeout(10000);
-                connection.setInstanceFollowRedirects(false);
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Sitemap Checker)");
+                    HttpURLConnection connection = (HttpURLConnection) new URL(encodedUrl).openConnection();
+                    connection.setRequestMethod("HEAD");
+                    connection.setConnectTimeout(10000);
+                    connection.setReadTimeout(10000);
+                    connection.setInstanceFollowRedirects(false);
+                    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Sitemap Checker)");
 
-                int statusCode = connection.getResponseCode();
+                    int statusCode = connection.getResponseCode();
 
-                String result = String.format("%s[%d] %s", indent, statusCode, url);
+                    String result = String.format("%s[%d] %s", indent, statusCode, url);
 
-                if (! url.equals(encodedUrl)) {
-                    result += "\n" + indent + "   🔗 Encoded: " + encodedUrl;
+                    if (! url.equals(encodedUrl)) {
+                        result += "\n" + indent + "   🔗 Encoded: " + encodedUrl;
+                    }
+
+                    if (statusCode == 200) {
+                        totalOK.incrementAndGet();
+                        String output = result + " ✅";
+                        synchronized (System.out) {
+                            System.out. println(output);
+                        }
+                        logToFile(output);
+                        logToCsv(statusCode, url, encodedUrl, null);
+                        allResults.add(String.format("[%d] %s", statusCode, url));
+                    } else {
+                        totalErrors.incrementAndGet();
+                        String output = result + " ⚠️";
+                        synchronized (System.out) {
+                            System.out.println(output);
+                        }
+                        logToFile(output);
+                        logToCsv(statusCode, url, encodedUrl, "Non-200 status");
+                        allResults.add(String.format("[%d] %s", statusCode, url));
+                        errorDetails.add(String.format("[%d] %s", statusCode, url));
+                    }
+
+                    connection.disconnect();
+                    Thread.sleep(50);
+                    return;
+                } finally {
+                    rateLimiter.release();
                 }
-
-                if (statusCode == 200) {
-                    totalOK++;
-                    String output = result + " ✅";
-                    System.out. println(output);
-                    logToFile(output);
-                    logToCsv(statusCode, url, encodedUrl, null);
-                    allResults.add(String.format("[%d] %s", statusCode, url));
-                } else {
-                    totalErrors++;
-                    String output = result + " ⚠️";
-                    System.out.println(output);
-                    logToFile(output);
-                    logToCsv(statusCode, url, encodedUrl, "Non-200 status");
-                    allResults.add(String.format("[%d] %s", statusCode, url));
-                    errorDetails.add(String.format("[%d] %s", statusCode, url));
-                }
-
-                connection.disconnect();
-                Thread.sleep(50);
-                return;
 
             } catch (java.net. SocketTimeoutException e) {
                 retryCount++;
                 if (retryCount <= maxRetries) {
                     String retryMsg = indent + "⏱️ Timeout, yenidən cəhd " + retryCount + "/" + maxRetries + ": " + url;
-                    System.out. println(retryMsg);
+                    synchronized (System.out) {
+                        System.out. println(retryMsg);
+                    }
                     logToFile(retryMsg);
                     try {
                         Thread.sleep(1000);
-                    } catch (InterruptedException ie) {}
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
                 } else {
-                    totalErrors++;
+                    totalErrors.incrementAndGet();
                     String error = String.format("%s[TIMEOUT] %s ❌", indent, url);
-                    System.out.println(error);
+                    synchronized (System.out) {
+                        System.out.println(error);
+                    }
                     logToFile(error);
                     logToCsv(0, url, null, "Timeout after " + maxRetries + " retries");
                     allResults.add(String.format("[TIMEOUT] %s", url));
                     errorDetails.add(String.format("[TIMEOUT] %s", url));
                 }
             } catch (Exception e) {
-                totalErrors++;
+                totalErrors.incrementAndGet();
                 String error = String.format("%s[ERROR] %s - %s ❌", indent, url, e. getMessage());
-                System.out. println(error);
+                synchronized (System.out) {
+                    System.out. println(error);
+                }
                 logToFile(error);
                 logToCsv(0, url, null, e.getMessage());
                 allResults.add(String.format("[ERROR] %s - %s", url, e.getMessage()));
@@ -407,14 +486,14 @@ public class SitemapChecker {
         summary.append("\n").append("═".repeat(70)).append("\n");
         summary.append("📊 YEKUN NƏTİCƏ\n");
         summary.append("═".repeat(70)).append("\n");
-        summary.append("   📌 Yoxlanan link sayı: ").append(totalChecked).append("\n");
-        if (totalSkipped > 0) {
-            summary.append("   ⏭️  Skip edilən sitemap sayı: ").append(totalSkipped).append("\n");
+        summary.append("   📌 Yoxlanan link sayı: ").append(totalChecked.get()).append("\n");
+        if (totalSkipped.get() > 0) {
+            summary.append("   ⏭️  Skip edilən sitemap sayı: ").append(totalSkipped.get()).append("\n");
         }
-        summary.append("   ✅ Uğurlu (200): ").append(totalOK).append("\n");
-        summary.append("   ❌ Xətalı:  ").append(totalErrors).append("\n");
+        summary.append("   ✅ Uğurlu (200): ").append(totalOK.get()).append("\n");
+        summary.append("   ❌ Xətalı:  ").append(totalErrors.get()).append("\n");
 
-        double successRate = totalChecked > 0 ? (totalOK * 100.0 / totalChecked) : 0;
+        double successRate = totalChecked.get() > 0 ? (totalOK.get() * 100.0 / totalChecked.get()) : 0;
         summary.append("   📈 Uğur nisbəti: ").append(String.format("%.2f", successRate)).append("%\n");
 
         if (! errorDetails.isEmpty()) {
@@ -431,7 +510,9 @@ public class SitemapChecker {
         summary.append("█".repeat(70)).append("\n");
 
         String summaryText = summary.toString();
-        System.out.println(summaryText);
+        synchronized (System.out) {
+            System.out.println(summaryText);
+        }
         logToFile(summaryText);
     }
 }
