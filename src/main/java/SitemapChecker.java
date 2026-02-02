@@ -18,8 +18,8 @@ public class SitemapChecker {
 
     // ⚙️ SİTEMAP KATEQORİYA FİLTRLƏRİ - true = yoxla, false = skip et
     private static final boolean CHECK_STATIC = false;           // /sitemaps/static/
-    private static final boolean CHECK_UNIVERSITIES = false;    // /sitemaps/universities/
-    private static final boolean CHECK_BLOGS = true;           // /sitemaps/blogs/
+    private static final boolean CHECK_UNIVERSITIES = true;    // /sitemaps/universities/
+    private static final boolean CHECK_BLOGS = false;           // /sitemaps/blogs/
     private static final boolean CHECK_BLOG_TAGS = false;       // /sitemaps/blog-tags/
     private static final boolean CHECK_BLOG_CATEGORIES = false; // /sitemaps/blog-categories/
     private static final boolean CHECK_SEO_PAGES = false;        // /sitemaps/seo-pages/
