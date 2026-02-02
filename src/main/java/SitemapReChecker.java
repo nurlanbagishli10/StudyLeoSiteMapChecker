@@ -6,6 +6,9 @@ import java.util.regex.*;
 
 public class SitemapReChecker {
 
+    // ⚙️ LOG QOVLUQ KONFİQURASİYASI
+    private static final String LOG_DIRECTORY = "logs";  // Logların saxlanacağı qovluq
+
     private int totalRechecked = 0;
     private int fixedErrors = 0;
     private int stillErrors = 0;
@@ -185,12 +188,31 @@ public class SitemapReChecker {
     }
 
     /**
+     * Log qovluğunu yarat (əgər yoxdursa)
+     */
+    private File ensureLogDirectoryExists() {
+        File logDirectory = new File(LOG_DIRECTORY);
+        if (!logDirectory.exists()) {
+            boolean created = logDirectory.mkdirs();
+            if (created) {
+                System.out.println("📁 Log qovluğu yaradıldı: " + logDirectory.getAbsolutePath());
+            } else {
+                System.err.println("⚠️ Log qovluğu yaradıla bilmədi, cari qovluqda saxlanacaq");
+                return new File(".");  // Fallback olaraq cari qovluq
+            }
+        }
+        return logDirectory;
+    }
+
+    /**
      * ⭐ YENİ METOD: Bütün faylları birləşdir
      */
     private File mergeAllFiles(File[] files) {
         try {
+            File logDir = ensureLogDirectoryExists();
             String mergedFilename = "merged_errors_" + System.currentTimeMillis() + ".txt";
-            PrintWriter writer = new PrintWriter(new FileWriter(mergedFilename));
+            File mergedFile = new File(logDir, mergedFilename);
+            PrintWriter writer = new PrintWriter(new FileWriter(mergedFile));
 
             Set<String> allUrls = new LinkedHashSet<>(); // Dublikatları çıxart
 
@@ -205,10 +227,10 @@ public class SitemapReChecker {
 
             writer.close();
 
-            System.out.println("✅ " + files.length + " fayl birləşdirildi → " + mergedFilename);
+            System.out.println("✅ " + files.length + " fayl birləşdirildi → " + mergedFile.getAbsolutePath());
             System.out.println("   Toplam unikal xətalı link: " + allUrls.size() + "\n");
 
-            return new File(mergedFilename);
+            return mergedFile;
 
         } catch (IOException e) {
             System.err.println("❌ Faylları birləşdirmə xətası: " + e.getMessage());
@@ -533,9 +555,11 @@ public class SitemapReChecker {
     }
 
     private void exportToFile() {
+        File logDir = ensureLogDirectoryExists();
         String filename = "recheck_report_" + System.currentTimeMillis() + ".txt";
+        File reportFile = new File(logDir, filename);
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(reportFile))) {
             writer.println("SITEMAP RE-CHECK REPORT");
             writer.println("Generated: " + new Date());
             writer.println("=". repeat(80));
@@ -559,7 +583,7 @@ public class SitemapReChecker {
                 writer.println("  Status:  " + (result.hasSuccess() ? "WORKING" : "BROKEN"));
             }
 
-            System.out.println("✅ Report faylı yaradıldı:  " + filename);
+            System.out.println("✅ Report faylı yaradıldı: " + reportFile.getAbsolutePath());
 
         } catch (IOException e) {
             System.err.println("❌ Fayl yazma xətası:  " + e.getMessage());
