@@ -361,56 +361,66 @@ public class SitemapChecker {
         int retryCount = 0;
 
         while (retryCount <= maxRetries) {
+            boolean permitAcquired = false;
             try {
                 // Rate limiting
                 rateLimiter.acquire();
+                permitAcquired = true;
                 
-                try {
-                    String encodedUrl = encodeUrl(url);
+                String encodedUrl = encodeUrl(url);
 
-                    HttpURLConnection connection = (HttpURLConnection) new URL(encodedUrl).openConnection();
-                    connection.setRequestMethod("HEAD");
-                    connection.setConnectTimeout(10000);
-                    connection.setReadTimeout(10000);
-                    connection.setInstanceFollowRedirects(false);
-                    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Sitemap Checker)");
+                HttpURLConnection connection = (HttpURLConnection) new URL(encodedUrl).openConnection();
+                connection.setRequestMethod("HEAD");
+                connection.setConnectTimeout(10000);
+                connection.setReadTimeout(10000);
+                connection.setInstanceFollowRedirects(false);
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Sitemap Checker)");
 
-                    int statusCode = connection.getResponseCode();
+                int statusCode = connection.getResponseCode();
 
-                    String result = String.format("%s[%d] %s", indent, statusCode, url);
+                String result = String.format("%s[%d] %s", indent, statusCode, url);
 
-                    if (! url.equals(encodedUrl)) {
-                        result += "\n" + indent + "   🔗 Encoded: " + encodedUrl;
-                    }
-
-                    if (statusCode == 200) {
-                        totalOK.incrementAndGet();
-                        String output = result + " ✅";
-                        synchronized (System.out) {
-                            System.out. println(output);
-                        }
-                        logToFile(output);
-                        logToCsv(statusCode, url, encodedUrl, null);
-                        allResults.add(String.format("[%d] %s", statusCode, url));
-                    } else {
-                        totalErrors.incrementAndGet();
-                        String output = result + " ⚠️";
-                        synchronized (System.out) {
-                            System.out.println(output);
-                        }
-                        logToFile(output);
-                        logToCsv(statusCode, url, encodedUrl, "Non-200 status");
-                        allResults.add(String.format("[%d] %s", statusCode, url));
-                        errorDetails.add(String.format("[%d] %s", statusCode, url));
-                    }
-
-                    connection.disconnect();
-                    Thread.sleep(50);
-                    return;
-                } finally {
-                    rateLimiter.release();
+                if (! url.equals(encodedUrl)) {
+                    result += "\n" + indent + "   🔗 Encoded: " + encodedUrl;
                 }
 
+                if (statusCode == 200) {
+                    totalOK.incrementAndGet();
+                    String output = result + " ✅";
+                    synchronized (System.out) {
+                        System.out. println(output);
+                    }
+                    logToFile(output);
+                    logToCsv(statusCode, url, encodedUrl, null);
+                    allResults.add(String.format("[%d] %s", statusCode, url));
+                } else {
+                    totalErrors.incrementAndGet();
+                    String output = result + " ⚠️";
+                    synchronized (System.out) {
+                        System.out.println(output);
+                    }
+                    logToFile(output);
+                    logToCsv(statusCode, url, encodedUrl, "Non-200 status");
+                    allResults.add(String.format("[%d] %s", statusCode, url));
+                    errorDetails.add(String.format("[%d] %s", statusCode, url));
+                }
+
+                connection.disconnect();
+                Thread.sleep(50);
+                return;
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                totalErrors.incrementAndGet();
+                String error = String.format("%s[INTERRUPTED] %s ❌", indent, url);
+                synchronized (System.out) {
+                    System.out.println(error);
+                }
+                logToFile(error);
+                logToCsv(0, url, null, "Thread interrupted");
+                allResults.add(String.format("[INTERRUPTED] %s", url));
+                errorDetails.add(String.format("[INTERRUPTED] %s", url));
+                return;
             } catch (java.net. SocketTimeoutException e) {
                 retryCount++;
                 if (retryCount <= maxRetries) {
@@ -423,6 +433,7 @@ public class SitemapChecker {
                         Thread.sleep(1000);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
+                        return;
                     }
                 } else {
                     totalErrors.incrementAndGet();
@@ -446,6 +457,10 @@ public class SitemapChecker {
                 allResults.add(String.format("[ERROR] %s - %s", url, e.getMessage()));
                 errorDetails.add(String.format("[ERROR] %s - %s", url, e. getMessage()));
                 return;
+            } finally {
+                if (permitAcquired) {
+                    rateLimiter.release();
+                }
             }
         }
     }
