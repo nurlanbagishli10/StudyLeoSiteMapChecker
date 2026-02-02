@@ -1,0 +1,209 @@
+SITEMAP RE-CHECK REPORT
+Generated: Mon Feb 02 13:47:41 AZT 2026
+================================================================================
+
+SUMMARY:
+Total Rechecked: 33
+Fixed/Working: 33
+Still Broken: 0
+
+DETAILED RESULTS:
+================================================================================
+
+URL:  https://studyleo.com/fa/بهترین-دانشگاههای-خصوصی-در-استانبول
+  Attempt 1 (HEAD): [200] - 3199ms
+  Attempt 2 (GET):  [200] - 805ms
+  Attempt 3 (GET):  [200] - 500ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/fa/مدرک-کارشناسی-ارشد-در-ترکیه
+  Attempt 1 (HEAD): [200] - 514ms
+  Attempt 2 (GET):  [200] - 320ms
+  Attempt 3 (GET):  [200] - 576ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/tr/kayseri-turkiye-universiteleri
+  Attempt 1 (HEAD): [200] - 715ms
+  Attempt 2 (GET):  [200] - 622ms
+  Attempt 3 (GET):  [200] - 514ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/tr/nevsehir-turkiye-universiteleri
+  Attempt 1 (HEAD): [200] - 460ms
+  Attempt 2 (GET):  [200] - 488ms
+  Attempt 3 (GET):  [200] - 752ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-swasta-terbaik-di-istanbul
+  Attempt 1 (HEAD): [200] - 866ms
+  Attempt 2 (GET):  [200] - 780ms
+  Attempt 3 (GET):  [200] - 554ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-alanya-turki
+  Attempt 1 (HEAD): [200] - 479ms
+  Attempt 2 (GET):  [200] - 269ms
+  Attempt 3 (GET):  [200] - 468ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-ankara-turki
+  Attempt 1 (HEAD): [200] - 1279ms
+  Attempt 2 (GET):  [200] - 1129ms
+  Attempt 3 (GET):  [200] - 448ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-antalya-turki
+  Attempt 1 (HEAD): [200] - 610ms
+  Attempt 2 (GET):  [200] - 628ms
+  Attempt 3 (GET):  [200] - 435ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-bursa-turki
+  Attempt 1 (HEAD): [200] - 716ms
+  Attempt 2 (GET):  [200] - 251ms
+  Attempt 3 (GET):  [200] - 434ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-istanbul-turki
+  Attempt 1 (HEAD): [200] - 1406ms
+  Attempt 2 (GET):  [200] - 274ms
+  Attempt 3 (GET):  [200] - 1601ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-izmir-turki
+  Attempt 1 (HEAD): [200] - 783ms
+  Attempt 2 (GET):  [200] - 249ms
+  Attempt 3 (GET):  [200] - 1003ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-kayseri-turki
+  Attempt 1 (HEAD): [200] - 644ms
+  Attempt 2 (GET):  [200] - 248ms
+  Attempt 3 (GET):  [200] - 456ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-kocaeli-turki
+  Attempt 1 (HEAD): [200] - 650ms
+  Attempt 2 (GET):  [200] - 254ms
+  Attempt 3 (GET):  [200] - 427ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-konya-turki
+  Attempt 1 (HEAD): [200] - 590ms
+  Attempt 2 (GET):  [200] - 254ms
+  Attempt 3 (GET):  [200] - 432ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-mersin-turki
+  Attempt 1 (HEAD): [200] - 585ms
+  Attempt 2 (GET):  [200] - 267ms
+  Attempt 3 (GET):  [200] - 757ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/id/universitas-di-trabzon-turki
+  Attempt 1 (HEAD): [200] - 469ms
+  Attempt 2 (GET):  [200] - 257ms
+  Attempt 3 (GET):  [200] - 419ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/de/universitaten-in-kayseri-turkei
+  Attempt 1 (HEAD): [200] - 675ms
+  Attempt 2 (GET):  [200] - 537ms
+  Attempt 3 (GET):  [200] - 491ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/zh/istanbul-最佳-私立-大学
+  Attempt 1 (HEAD): [200] - 956ms
+  Attempt 2 (GET):  [200] - 827ms
+  Attempt 3 (GET):  [200] - 609ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/zh/安塔利亚-土耳其-大学
+  Attempt 1 (HEAD): [200] - 524ms
+  Attempt 2 (GET):  [200] - 526ms
+  Attempt 3 (GET):  [200] - 465ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/zh/伊斯坦布尔-土耳其-大学
+  Attempt 1 (HEAD): [200] - 1456ms
+  Attempt 2 (GET):  [200] - 1376ms
+  Attempt 3 (GET):  [200] - 473ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/fr/meilleures-universites-privees-a-istanbul
+  Attempt 1 (HEAD): [200] - 915ms
+  Attempt 2 (GET):  [200] - 256ms
+  Attempt 3 (GET):  [200] - 472ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/ur/انقرہ-ترکی-کی-یونیورسٹیاں
+  Attempt 1 (HEAD): [200] - 1110ms
+  Attempt 2 (GET):  [200] - 1083ms
+  Attempt 3 (GET):  [200] - 457ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/ur/استنبول-ترکی-کی-یونیورسٹیاں
+  Attempt 1 (HEAD): [200] - 1431ms
+  Attempt 2 (GET):  [200] - 1519ms
+  Attempt 3 (GET):  [200] - 457ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/so/jaamacadaha-alanya-turkey
+  Attempt 1 (HEAD): [200] - 760ms
+  Attempt 2 (GET):  [200] - 467ms
+  Attempt 3 (GET):  [200] - 492ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/so/jaamacadaha-ankara-turkey
+  Attempt 1 (HEAD): [200] - 1102ms
+  Attempt 2 (GET):  [200] - 1207ms
+  Attempt 3 (GET):  [200] - 446ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/so/jaamacadaha-antalya-turkey
+  Attempt 1 (HEAD): [200] - 714ms
+  Attempt 2 (GET):  [200] - 519ms
+  Attempt 3 (GET):  [200] - 1061ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/so/jaamacadaha-gaziantep-turkey
+  Attempt 1 (HEAD): [200] - 601ms
+  Attempt 2 (GET):  [200] - 270ms
+  Attempt 3 (GET):  [200] - 651ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/so/jaamacadaha-kayseri-turkey
+  Attempt 1 (HEAD): [200] - 632ms
+  Attempt 2 (GET):  [200] - 551ms
+  Attempt 3 (GET):  [200] - 427ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/so/jaamacadaha-konya-turkey
+  Attempt 1 (HEAD): [200] - 626ms
+  Attempt 2 (GET):  [200] - 640ms
+  Attempt 3 (GET):  [200] - 452ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/so/jaamacadaha-trabzon-turkey
+  Attempt 1 (HEAD): [200] - 478ms
+  Attempt 2 (GET):  [200] - 250ms
+  Attempt 3 (GET):  [200] - 676ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/tk/ankarada-universitetler-turkiye
+  Attempt 1 (HEAD): [200] - 1102ms
+  Attempt 2 (GET):  [200] - 266ms
+  Attempt 3 (GET):  [200] - 426ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/tk/antalya-turkiyedaki-universitetler
+  Attempt 1 (HEAD): [200] - 476ms
+  Attempt 2 (GET):  [200] - 505ms
+  Attempt 3 (GET):  [200] - 411ms
+  Status:  WORKING
+
+URL:  https://studyleo.com/ar/الجامعات-في-أنطاليا-تركيا
+  Attempt 1 (HEAD): [200] - 614ms
+  Attempt 2 (GET):  [200] - 251ms
+  Attempt 3 (GET):  [200] - 717ms
+  Status:  WORKING
